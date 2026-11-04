@@ -5,7 +5,7 @@
 ============================================ */
 
 // ---------- DATA ----------
-
+let titleContainer;
 let species = [
   {
     name: "Dodó",
@@ -250,8 +250,41 @@ function preload() {
 // ---------- SETUP ----------
 
 function setup() {
-
   createCanvas(windowWidth, windowHeight, WEBGL);
+  
+  // 1. Criar o cabeçalho centrado no topo
+  headerContainer = createDiv();
+  headerContainer.position(0, 25);
+  headerContainer.style('width', '100%');
+  headerContainer.style('text-align', 'center');
+  headerContainer.style('color', '#ffffff');
+  headerContainer.style('font-family', 'Segoe UI, sans-serif');
+  headerContainer.style('pointer-events', 'none'); // Crucial para o rato interagir com o globo 3D
+  headerContainer.style('z-index', '10');
+  
+  headerContainer.html(`
+    <h1 style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);">Atlas de Espécies Extintas</h1>
+    <p style="margin: 6px 0 0 0; font-size: 14px; opacity: 0.85; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">Clica num marcador no globo para explorar a história de cada espécie</p>
+  `);
+
+  infoPanel = createDiv();
+  infoPanel.id('species-info-panel');
+  infoPanel.style('position', 'absolute');
+  infoPanel.style('top', '100px');
+  infoPanel.style('right', '40px'); // Fica na lateral direita, fora do centro do globo
+  infoPanel.style('width', '320px');
+  infoPanel.style('max-height', '80vh');
+  infoPanel.style('overflow-y', 'auto');
+  infoPanel.style('background', 'rgba(15, 23, 42, 0.85)'); // Fundo escuro translúcido elegante
+  infoPanel.style('backdrop-filter', 'blur(8px)');
+  infoPanel.style('border', '1px solid rgba(255, 255, 255, 0.1)');
+  infoPanel.style('border-radius', '12px');
+  infoPanel.style('padding', '20px');
+  infoPanel.style('color', '#ffffff');
+  infoPanel.style('font-family', 'Segoe UI, sans-serif');
+  infoPanel.style('box-shadow', '0 10px 30px rgba(0,0,0,0.5)');
+  infoPanel.style('z-index', '20');
+  infoPanel.style('display', 'none');
 
   setAttributes("antialias", true);
 
@@ -287,6 +320,7 @@ function setup() {
   }
 
   updateGlobeSize();
+  updateHeaderStyle();
 }
 
 // ---------- MAIN DRAW ----------
@@ -334,6 +368,31 @@ function updateGlobeSize() {
       width * 0.17,
       height * 0.25
     );
+  }
+}
+
+function updateHeaderStyle() {
+  let globeScreenX = width / 2 + globeCenterX();
+  
+  if (selected === -1) {
+    // Estado inicial: Centrado a ocupar a largura toda
+    headerContainer.style('width', '100%');
+    headerContainer.position(0, 25);
+    headerContainer.style('text-align', 'center');
+    headerContainer.html(`
+      <h1 style="margin: 0; font-size: 26px; font-weight: 600; letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);">Atlas de Espécies Extintas</h1>
+      <p style="margin: 6px 0 0 0; font-size: 14px; opacity: 0.85; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">Clica num marcador no globo para explorar a história de cada espécie</p>
+    `);
+  } else {
+    // Com espécie selecionada: Ajusta a largura e centra exatamente com o novo centro do globo
+    let headerWidth = min(width * 0.5, 450);
+    headerContainer.style('width', headerWidth + 'px');
+    headerContainer.position(globeScreenX - headerWidth / 2, 25);
+    headerContainer.style('text-align', 'center');
+    headerContainer.html(`
+      <h1 style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);">Atlas de Espécies Extintas</h1>
+      <p style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.85; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">Clica num marcador para explorar</p>
+    `);
   }
 }
 
@@ -556,6 +615,7 @@ function selectAnimal(i) {
   renderInformation(animal);
 
   infoPanel.style("display", "block");
+  updateHeaderStyle();
 }
 
 // ---------- INFORMATION PANEL ----------
@@ -580,6 +640,7 @@ function createInfoPanel() {
     updateGlobeSize();
 
     infoPanel.style("display", "none");
+    updateHeaderStyle();
   });
 
   let content = createDiv("");
@@ -719,6 +780,7 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 
   updateGlobeSize();
+  updateHeaderStyle();
 
   stars = [];
 
